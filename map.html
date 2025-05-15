@@ -9,105 +9,90 @@
   <style>
     /* ── 전체 레이아웃 ── */
     body {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column; height: 100vh;
       font-family: 'Segoe UI', sans-serif;
     }
     /* ── 헤더 ── */
     #header {
-      background: #0056b3;
-      color: #fff;
-      text-align: center;
-      padding: 12px 20px;
+      background: #0056b3; color: #fff;
+      text-align: center; padding: 12px 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
     #header h1 {
-      margin: 0;
-      font-size: 1.6em;
-      line-height: 1.2;
+      margin: 0; font-size: 1.6em; line-height: 1.2;
+    }
+    .mobile-br { display: none; }
+    @media (max-width: 768px) {
+      .mobile-br { display: block; }
     }
     #header h2 {
-      margin: 4px 0 0;
-      font-size: 1.1em;
-      font-weight: 300;
-      opacity: 0.9;
+      margin: 4px 0 0; font-size: 1.1em;
+      font-weight: 300; opacity: 0.9;
     }
 
     /* ── 본문 ── */
     #content {
-      flex: 1;
-      display: flex;
-      position: relative;
+      flex: 1; display: flex; position: relative;
     }
     #map { flex: 1; }
     #sidebar {
-      width: 300px;
-      padding: 15px;
-      background: #fff;
-      border-left: 1px solid #ddd;
+      width: 300px; padding: 15px;
+      background: #fff; border-left: 1px solid #ddd;
       box-shadow: -2px 0 5px rgba(0,0,0,0.1);
       overflow-y: auto;
     }
     #sidebar h3 {
-      margin-top: 0;
-      font-size: 1.2em;
-      color: #007bff;
-      border-bottom: 2px solid #007bff;
+      margin-top: 0; font-size: 1.2em;
+      color: #007bff; border-bottom: 2px solid #007bff;
       padding-bottom: 5px;
     }
     #schedule-list {
-      list-style: none;
-      padding-left: 0;
-      margin-top: 10px;
+      list-style: none; padding-left: 0; margin-top: 10px;
     }
     #schedule-list li {
-      margin-bottom: 8px;
-      font-size: 0.95em;
+      margin-bottom: 8px; font-size: 0.95em;
     }
 
     /* ── 툴팁 (장소 텍스트) ── */
     .leaflet-tooltip {
       background: rgba(255,255,255,0.9);
-      border: none;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-      border-radius: 4px;
-      font-size: 10px;
-      padding: 2px 6px;
-      color: #333;
+      border: none; box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      border-radius: 4px; font-size: 10px;
+      padding: 2px 6px; color: #333;
     }
     .leaflet-popup-content-wrapper {
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
-    /* ── 범례 & 총거리 ── */
-    #legend, #total-distance {
-      position: absolute;
+    /* ── 범례 ── */
+    #legend {
+      position: absolute; top: 15px; left: 15px;
       background: rgba(255,255,255,0.95);
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 8px 12px; border-radius: 6px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      font-size: 13px;
-      color: #333;
-      z-index: 1000;
+      font-size: 13px; color: #333; z-index: 1000;
     }
-    #legend { top: 15px; left: 15px; }
     #legend strong { display: block; margin-bottom: 4px; }
-    #total-distance { bottom: 15px; left: 15px; font-weight: 600; }
+
+    /* ── 누적 거리 ── */
+    #total-distance {
+      position: absolute;
+      top: 140px;   /* 범례 바로 아래 */
+      left: 15px;
+      background: rgba(255,255,255,0.95);
+      padding: 8px 12px; border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      font-size: 13px; color: #333;
+      font-weight: 600; z-index: 1000;
+    }
 
     /* ── 필터 버튼 ── */
     .filter-button {
-      margin: 5px 5px 5px 0;
-      padding: 6px 12px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9em;
+      margin: 5px 5px 5px 0; padding: 6px 12px;
+      background: #007bff; color: #fff;
+      border: none; border-radius: 4px;
+      cursor: pointer; font-size: 0.9em;
       transition: background 0.2s;
     }
     .filter-button:hover { background: #0056b3; }
@@ -116,35 +101,26 @@
       box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
     }
 
-    /* ── 모바일 대응: 화면 너비 768px 이하일 때 ── */
+    /* ── 모바일 대응 ── */
     @media (max-width: 768px) {
-      /* content를 세로로 쌓이게 */
-      #content {
-        flex-direction: column;
-      }
-
-      /* map은 화면 높이의 60% 정도 차지 */
+      #content { flex-direction: column; }
       #map {
-        height: 60vh !important;
-        width: 100% !important;
+        height: 60vh !important; width: 100% !important;
       }
-
-      /* sidebar는 화면 폭 전체, 높이 40% */
       #sidebar {
-        width: 100% !important;
-        height: 40vh;
-        border-left: none;
-        border-top: 1px solid #ddd;
+        width: 100% !important; height: 40vh;
+        border-left: none; border-top: 1px solid #ddd;
         box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
       }
-
-      /* legend와 total-distance 위치 조정 */
-      #legend, #total-distance {
-        left: 50%;
-        transform: translateX(-50%);
+      #legend {
+        left: 15px !important; transform: none !important;
       }
-      #legend { top: 10px; }
-      #total-distance { bottom: 10px; }
+      #total-distance {
+        top: calc(15px + 70px) !important;
+        left: 15px !important;
+        bottom: auto !important;
+        transform: none !important;
+      }
     }
   </style>
 </head>
@@ -152,11 +128,11 @@
 
   <!-- 헤더 -->
   <div id="header">
-    <h1>이제부터 진짜 대한민국, 지금은 이재명</h1>
+    <h1>이제부터 진짜 대한민국<span class="mobile-br"><br></span>지금은 이재명</h1>
     <h2>박찬대 상임총괄선대위원장 유세지도</h2>
   </div>
 
-  <!-- 본문: 지도 + 사이드바 -->
+  <!-- 본문 -->
   <div id="content">
     <div id="map"></div>
     <div id="sidebar">
@@ -167,13 +143,13 @@
 
     <!-- 범례 -->
     <div id="legend">
-      <strong>일자별</strong>
+      <strong>일자별</strong><br>
       🔵 5월 12일<br>
       🟢 5월 13일<br>
       🟡 5월 14일<br>
       🟣 5월 15일
     </div>
-    <!-- 총 이동 거리 -->
+    <!-- 누적 이동 거리 -->
     <div id="total-distance">총 이동 거리: 0 km</div>
   </div>
 
@@ -181,7 +157,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
   <script>
-    // 1) 일정 데이터
+    // 1) 일정 데이터 (12~15일 전부 포함)
     const schedule = [
       { date: "5월 12일", time: "09:00", title: "중앙선거대책위원회 출정식", coords: [37.5704, 126.9769], color: 'blue' },
       { date: "5월 12일", time: "12:30", title: "신포시장", coords: [37.4717, 126.6212], color: 'blue' },
@@ -230,7 +206,7 @@
     let activeLayers = [];
     function clearMap() {
       activeLayers.forEach(l => map.removeLayer(l));
-      activeLayers = [];   
+      activeLayers = [];
     }
 
     // 3) 일정 렌더링
@@ -248,11 +224,12 @@
           fillOpacity: 0.8
         })
         .addTo(map)
+        // hover/click 시에만 보이도록 permanent -> sticky
         .bindTooltip(event.title, {
-          permanent: true,
           className: 'leaflet-tooltip',
           direction: 'top',
-          offset: [0, -10]
+          offset: [0, -10],
+          sticky: true
         })
         .bindPopup(`<strong>${event.time}</strong><br>${event.title}<br>${event.date}`);
 
@@ -265,7 +242,7 @@
 
         if (i > 0) {
           const from = turf.point([list[i-1].coords[1], list[i-1].coords[0]]);
-          const to   = turf.point([event.coords[1], event.coords[0]]);
+          const to = turf.point([event.coords[1], event.coords[0]]);
           const dist = turf.distance(from, to, { units: 'kilometers' });
           totalDistance += dist;
 
@@ -274,7 +251,11 @@
 
           const midLat = (event.coords[0] + list[i-1].coords[0]) / 2;
           const midLng = (event.coords[1] + list[i-1].coords[1]) / 2;
-          const label = L.tooltip({ permanent: true, className: 'leaflet-tooltip', direction: 'center' })
+          const label = L.tooltip({
+            permanent: true,
+            className: 'leaflet-tooltip',
+            direction: 'center'
+          })
             .setLatLng([midLat, midLng])
             .setContent(`${dist.toFixed(2)} km`)
             .addTo(map);
