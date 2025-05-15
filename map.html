@@ -5,17 +5,44 @@
   <title>박찬대 유세 지도</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
-    /* ── 기본 레이아웃 ── */
+    /* ── 전체 레이아웃 ── */
     body {
-      margin: 0; padding: 0;
-      display: flex; height: 100vh;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
       font-family: 'Segoe UI', sans-serif;
     }
-    #map { flex: 1; }
+    /* ── 헤더 ── */
+    #header {
+      background: #0056b3;
+      color: #fff;
+      text-align: center;
+      padding: 12px 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    #header h1 {
+      margin: 0;
+      font-size: 1.6em;
+      line-height: 1.2;
+    }
+    #header h2 {
+      margin: 4px 0 0;
+      font-size: 1.1em;
+      font-weight: 300;
+      opacity: 0.9;
+    }
 
-    /* ── 사이드바 ── */
+    /* ── 본문 ── */
+    #content {
+      flex: 1;
+      display: flex;
+      position: relative;
+    }
+    #map { flex: 1; }
     #sidebar {
       width: 300px;
       padding: 15px;
@@ -47,12 +74,10 @@
       border: none;
       box-shadow: 0 1px 4px rgba(0,0,0,0.25);
       border-radius: 4px;
-      font-size: 10px;    /* 텍스트 크기 작게 */
-      padding: 2px 6px;   /* 여백 조정 */
+      font-size: 10px;
+      padding: 2px 6px;
       color: #333;
     }
-
-    /* ── 팝업 모서리 ── */
     .leaflet-popup-content-wrapper {
       border-radius: 6px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
@@ -70,6 +95,7 @@
       z-index: 1000;
     }
     #legend { top: 15px; left: 15px; }
+    #legend strong { display: block; margin-bottom: 4px; }
     #total-distance { bottom: 15px; left: 15px; font-weight: 600; }
 
     /* ── 필터 버튼 ── */
@@ -93,32 +119,36 @@
 </head>
 <body>
 
-  <!-- 지도 -->
-  <div id="map"></div>
-
-  <!-- 사이드바 -->
-  <div id="sidebar">
-    <h3>📅 유세 일정</h3>
-    <div id="filter-controls"></div>
-    <ul id="schedule-list"></ul>
+  <!-- 헤더 -->
+  <div id="header">
+    <h1>이제부터 진짜 대한민국, 지금은 이재명</h1>
+    <h2>박찬대 상임총괄선대위원장 유세지도</h2>
   </div>
 
-  <!-- 범례 -->
-  <div id="legend">
-    <strong>일자별</strong><br>
-    🔵 5월 12일<br>
-    🟢 5월 13일<br>
-    🟡 5월 14일<br>
-    🟣 5월 15일
-  </div>
+  <!-- 본문: 지도 + 사이드바 -->
+  <div id="content">
+    <div id="map"></div>
+    <div id="sidebar">
+      <h3>📅 유세 일정</h3>
+      <div id="filter-controls"></div>
+      <ul id="schedule-list"></ul>
+    </div>
 
-  <!-- 총 이동 거리 -->
-  <div id="total-distance">총 이동 거리: 0 km</div>
+    <!-- 범례 -->
+    <div id="legend">
+      <strong>일자별</strong>
+      🔵 5월 12일<br>
+      🟢 5월 13일<br>
+      🟡 5월 14일<br>
+      🟣 5월 15일
+    </div>
+    <!-- 총 이동 거리 -->
+    <div id="total-distance">총 이동 거리: 0 km</div>
+  </div>
 
   <!-- Leaflet + Turf.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-
   <script>
     // 1) 일정 데이터
     const schedule = [
@@ -172,7 +202,7 @@
       activeLayers = [];
     }
 
-    // 3) 일정 렌더링 함수
+    // 3) 일정 렌더링
     function renderSchedule(date) {
       clearMap();
       scheduleList.innerHTML = '';
@@ -181,7 +211,6 @@
       const latlngs = [];
 
       list.forEach((event, i) => {
-        // 마커 추가
         const marker = L.circleMarker(event.coords, {
           color: event.color,
           radius: 7,
@@ -199,24 +228,20 @@
         activeLayers.push(marker);
         latlngs.push(event.coords);
 
-        // 사이드바 일정 추가
         const li = document.createElement('li');
         li.textContent = `🕒 ${event.date} ${event.time} - ${event.title}`;
         scheduleList.appendChild(li);
 
-        // 거리 & 선 그리기
         if (i > 0) {
           const from = turf.point([list[i-1].coords[1], list[i-1].coords[0]]);
           const to   = turf.point([event.coords[1], event.coords[0]]);
           const dist = turf.distance(from, to, { units: 'kilometers' });
           totalDistance += dist;
 
-          // 선
           const line = L.polyline([list[i-1].coords, event.coords], { color: 'gray' }).addTo(map);
           activeLayers.push(line);
 
-          // 중간거리 라벨
-          const midLat = (event.coords[0] + list[i-1].coords[0]) / 2;
+          const midLat = (event.coords[0] + list[i-1].coords[0]) / 2;  
           const midLng = (event.coords[1] + list[i-1].coords[1]) / 2;
           const label = L.tooltip({ permanent: true, className: 'leaflet-tooltip', direction: 'center' })
             .setLatLng([midLat, midLng])
@@ -226,7 +251,6 @@
         }
       });
 
-      // 전체 경로 그리기 & 화면 맞춤
       if (latlngs.length > 1) {
         const poly = L.polyline(latlngs, { color: 'gray' }).addTo(map);
         activeLayers.push(poly);
@@ -249,7 +273,6 @@
       };
       filterControls.appendChild(btn);
     });
-    // 전체 보기 버튼
     const allBtn = document.createElement('button');
     allBtn.textContent = '전체 보기';
     allBtn.className = 'filter-button active';
