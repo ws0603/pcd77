@@ -115,6 +115,37 @@
       background: #0056b3;
       box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
     }
+
+    /* ── 모바일 대응: 화면 너비 768px 이하일 때 ── */
+    @media (max-width: 768px) {
+      /* content를 세로로 쌓이게 */
+      #content {
+        flex-direction: column;
+      }
+
+      /* map은 화면 높이의 60% 정도 차지 */
+      #map {
+        height: 60vh !important;
+        width: 100% !important;
+      }
+
+      /* sidebar는 화면 폭 전체, 높이 40% */
+      #sidebar {
+        width: 100% !important;
+        height: 40vh;
+        border-left: none;
+        border-top: 1px solid #ddd;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      }
+
+      /* legend와 total-distance 위치 조정 */
+      #legend, #total-distance {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      #legend { top: 10px; }
+      #total-distance { bottom: 10px; }
+    }
   </style>
 </head>
 <body>
@@ -199,7 +230,7 @@
     let activeLayers = [];
     function clearMap() {
       activeLayers.forEach(l => map.removeLayer(l));
-      activeLayers = [];
+      activeLayers = [];   
     }
 
     // 3) 일정 렌더링
@@ -241,7 +272,7 @@
           const line = L.polyline([list[i-1].coords, event.coords], { color: 'gray' }).addTo(map);
           activeLayers.push(line);
 
-          const midLat = (event.coords[0] + list[i-1].coords[0]) / 2;  
+          const midLat = (event.coords[0] + list[i-1].coords[0]) / 2;
           const midLng = (event.coords[1] + list[i-1].coords[1]) / 2;
           const label = L.tooltip({ permanent: true, className: 'leaflet-tooltip', direction: 'center' })
             .setLatLng([midLat, midLng])
