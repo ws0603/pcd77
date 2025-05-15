@@ -24,7 +24,20 @@
     }
     .mobile-br { display: none; }
     @media (max-width: 768px) {
-      .mobile-br { display: block; }
+      /* 모바일에서 헤더 줄바꿈 제거 */
+      .mobile-br { display: none !important; }
+      /* 헤더 높이 절반으로 축소 */
+      #header {
+        padding: 6px 10px !important;
+      }
+      #header h1 {
+        font-size: 1em !important;
+        line-height: 1.1 !important;
+      }
+      #header h2 {
+        font-size: 0.8em !important;
+        margin-top: 0 !important;
+      }
     }
     #header h2 {
       margin: 4px 0 0; font-size: 1.1em;
@@ -78,7 +91,7 @@
     /* ── 누적 거리 ── */
     #total-distance {
       position: absolute;
-      top: 140px;   /* 범례 바로 아래 */
+      top: 140px;   /* 데스크탑: 범례 바로 아래 */
       left: 15px;
       background: rgba(255,255,255,0.95);
       padding: 8px 12px; border-radius: 6px;
@@ -103,20 +116,24 @@
 
     /* ── 모바일 대응 ── */
     @media (max-width: 768px) {
+      /* content 세로 배치 */
       #content { flex-direction: column; }
+
+      /* map 크기 조정 */
       #map {
         height: 60vh !important; width: 100% !important;
       }
+
+      /* sidebar 아래 배치 */
       #sidebar {
         width: 100% !important; height: 40vh;
         border-left: none; border-top: 1px solid #ddd;
         box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
       }
-      #legend {
-        left: 15px !important; transform: none !important;
-      }
+
+      /* 총 이동 거리: legend 바로 아래로 충분히 */
       #total-distance {
-        top: calc(15px + 70px) !important;
+        top: calc(15px + 9em) !important;
         left: 15px !important;
         bottom: auto !important;
         transform: none !important;
@@ -224,7 +241,7 @@
           fillOpacity: 0.8
         })
         .addTo(map)
-        // hover/click 시에만 보이도록 permanent -> sticky
+        // hover/click 시에만
         .bindTooltip(event.title, {
           className: 'leaflet-tooltip',
           direction: 'top',
@@ -242,7 +259,7 @@
 
         if (i > 0) {
           const from = turf.point([list[i-1].coords[1], list[i-1].coords[0]]);
-          const to = turf.point([event.coords[1], event.coords[0]]);
+          const to   = turf.point([event.coords[1], event.coords[0]]);
           const dist = turf.distance(from, to, { units: 'kilometers' });
           totalDistance += dist;
 
