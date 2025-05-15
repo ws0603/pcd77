@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>박찬대 유세 지도</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    /* ── 기본 레이아웃 ── */
+    body {
+      margin: 0; padding: 0;
+      display: flex; height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    #map { flex: 1; }
+
+    /* ── 사이드바 ── */
+    #sidebar {
+      width: 300px;
+      padding: 15px;
+      background: #fff;
+      border-left: 1px solid #ddd;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+    #sidebar h3 {
+      margin-top: 0;
+      font-size: 1.2em;
+      color: #007bff;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 5px;
+    }
+    #schedule-list {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 10px;
+    }
+    #schedule-list li {
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+
+    /* ── 툴팁 (장소 텍스트) ── */
+    .leaflet-tooltip {
+      background: rgba(255,255,255,0.9);
+      border: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      border-radius: 4px;
+      font-size: 10px;    /* 텍스트 크기 작게 */
+      padding: 2px 6px;   /* 여백 조정 */
+      color: #333;
+    }
+
+    /* ── 팝업 모서리 ── */
+    .leaflet-popup-content-wrapper {
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* ── 범례 & 총거리 ── */
+    #legend, #total-distance {
+      position: absolute;
+      background: rgba(255,255,255,0.95);
+      padding: 8px 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      font-size: 13px;
+      color: #333;
+      z-index: 1000;
+    }
+    #legend { top: 15px; left: 15px; }
+    #total-distance { bottom: 15px; left: 15px; font-weight: 600; }
+
+    /* ── 필터 버튼 ── */
+    .filter-button {
+      margin: 5px 5px 5px 0;
+      padding: 6px 12px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.2s;
+    }
+    .filter-button:hover { background: #0056b3; }
+    .filter-button.active {
+      background: #0056b3;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 지도 -->
+  <div id="map"></div>
+
+  <!-- 사이드바 -->
+  <div id="sidebar">
+    <h3>📅 유세 일정</h3>
+    <div id="filter-controls"></div>
+    <ul id="schedule-list"></ul>
+  </div>
+
+  <!-- 범례 -->
+  <div id="legend">
+    <strong>일자별</strong><br>
+    🔵 5월 12일<br>
+    🟢 5월 13일<br>
+    🟡 5월 14일<br>
+    🟣 5월 15일
+  </div>
+
+  <!-- 총 이동 거리 -->
+  <div id="total-distance">총 이동 거리: 0 km</div>
+
+  <!-- Leaflet + Turf.js -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+  <script>
+    // 1) 일정 데이터
+    const schedule = [
+      { date: "5월 12일", time: "09:00", title: "중앙선거대책위원회 출정식", coords: [37.5704, 126.9769], color: 'blue' },
+      { date: "5월 12일", time: "12:30", title: "신포시장", coords: [37.4717, 126.6212], color: 'blue' },
+      { date: "5월 12일", time: "13:00", title: "답동성당 앞 사거리", coords: [37.4727, 126.6232], color: 'blue' },
+      { date: "5월 12일", time: "14:00", title: "가좌시장", coords: [37.4932, 126.6756], color: 'blue' },
+      { date: "5월 12일", time: "15:00", title: "청라롯데마트", coords: [37.5386, 126.6298], color: 'blue' },
+      { date: "5월 12일", time: "16:00", title: "계산역 사거리", coords: [37.5383, 126.7253], color: 'blue' },
+      { date: "5월 12일", time: "18:00", title: "인천의 빛 유세본부 출정식", coords: [37.4898, 126.7213], color: 'blue' },
+      { date: "5월 12일", time: "19:30", title: "부평역 인근 상가", coords: [37.4906, 126.7223], color: 'blue' },
+      { date: "5월 13일", time: "10:00", title: "예산역전시장", coords: [36.6802, 126.8471], color: 'green' },
+      { date: "5월 13일", time: "11:20", title: "내포시 상가방문", coords: [36.6588, 126.6723], color: 'green' },
+      { date: "5월 13일", time: "14:00", title: "논산화지시장", coords: [36.1918, 127.0887], color: 'green' },
+      { date: "5월 13일", time: "15:00", title: "논산시장 상인회", coords: [36.1918, 127.0887], color: 'green' },
+      { date: "5월 13일", time: "16:00", title: "계룡 간담회", coords: [36.2744, 127.2431], color: 'green' },
+      { date: "5월 13일", time: "16:30", title: "계룡시장", coords: [36.2764, 127.2428], color: 'green' },
+      { date: "5월 13일", time: "17:30", title: "금암사거리", coords: [36.2798, 127.2382], color: 'green' },
+      { date: "5월 14일", time: "13:10", title: "제천 내토시장", coords: [37.1365, 128.2121], color: 'orange' },
+      { date: "5월 14일", time: "14:50", title: "충주 자유시장", coords: [36.9910, 127.9268], color: 'orange' },
+      { date: "5월 14일", time: "16:10", title: "괴산 전통시장", coords: [36.8104, 127.7987], color: 'orange' },
+      { date: "5월 14일", time: "17:50", title: "청주 가경터미널시장", coords: [36.6376, 127.4316], color: 'orange' },
+      { date: "5월 15일", time: "10:00", title: "세종 간담회", coords: [36.5042, 127.2590], color: 'purple' },
+      { date: "5월 15일", time: "11:00", title: "조치원 전통시장", coords: [36.6010, 127.2891], color: 'purple' },
+      { date: "5월 15일", time: "12:10", title: "정부세종청사 앞", coords: [36.5043, 127.2658], color: 'purple' },
+      { date: "5월 15일", time: "13:30", title: "국립대전현충원", coords: [36.3384, 127.3085], color: 'purple' },
+      { date: "5월 15일", time: "14:10", title: "충남대 앞", coords: [36.3649, 127.3446], color: 'purple' },
+      { date: "5월 15일", time: "15:00", title: "카이스트 유세", coords: [36.3724, 127.3628], color: 'purple' },
+      { date: "5월 15일", time: "17:00", title: "이글스파크 유세", coords: [36.3195, 127.4193], color: 'purple' }
+    ];
+
+    // 2) 지도 초기화
+    const map = L.map('map').setView([36.5, 127.5], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+    }).addTo(map);
+
+    const filterControls   = document.getElementById('filter-controls');
+    const scheduleList     = document.getElementById('schedule-list');
+    const totalDistanceDiv = document.getElementById('total-distance');
+
+    // 날짜별 그룹핑
+    const groupedByDate = {};
+    schedule.forEach(e => {
+      (groupedByDate[e.date] = groupedByDate[e.date] || []).push(e);
+    });
+
+    let activeLayers = [];
+    function clearMap() {
+      activeLayers.forEach(l => map.removeLayer(l));
+      activeLayers = [];
+    }
+
+    // 3) 일정 렌더링 함수
+    function renderSchedule(date) {
+      clearMap();
+      scheduleList.innerHTML = '';
+      let totalDistance = 0;
+      const list = date === '전체 보기' ? schedule : (groupedByDate[date] || []);
+      const latlngs = [];
+
+      list.forEach((event, i) => {
+        // 마커 추가
+        const marker = L.circleMarker(event.coords, {
+          color: event.color,
+          radius: 7,
+          fillOpacity: 0.8
+        })
+        .addTo(map)
+        .bindTooltip(event.title, {
+          permanent: true,
+          className: 'leaflet-tooltip',
+          direction: 'top',
+          offset: [0, -10]
+        })
+        .bindPopup(`<strong>${event.time}</strong><br>${event.title}<br>${event.date}`);
+
+        activeLayers.push(marker);
+        latlngs.push(event.coords);
+
+        // 사이드바 일정 추가
+        const li = document.createElement('li');
+        li.textContent = `🕒 ${event.date} ${event.time} - ${event.title}`;
+        scheduleList.appendChild(li);
+
+        // 거리 & 선 그리기
+        if (i > 0) {
+          const from = turf.point([list[i-1].coords[1], list[i-1].coords[0]]);
+          const to   = turf.point([event.coords[1], event.coords[0]]);
+          const dist = turf.distance(from, to, { units: 'kilometers' });
+          totalDistance += dist;
+
+          // 선
+          const line = L.polyline([list[i-1].coords, event.coords], { color: 'gray' }).addTo(map);
+          activeLayers.push(line);
+
+          // 중간거리 라벨
+          const midLat = (event.coords[0] + list[i-1].coords[0]) / 2;
+          const midLng = (event.coords[1] + list[i-1].coords[1]) / 2;
+          const label = L.tooltip({ permanent: true, className: 'leaflet-tooltip', direction: 'center' })
+            .setLatLng([midLat, midLng])
+            .setContent(`${dist.toFixed(2)} km`)
+            .addTo(map);
+          activeLayers.push(label);
+        }
+      });
+
+      // 전체 경로 그리기 & 화면 맞춤
+      if (latlngs.length > 1) {
+        const poly = L.polyline(latlngs, { color: 'gray' }).addTo(map);
+        activeLayers.push(poly);
+        map.fitBounds(poly.getBounds(), { padding: [20,20] });
+      }
+
+      totalDistanceDiv.textContent = `총 이동 거리: ${totalDistance.toFixed(2)} km`;
+    }
+
+    // 4) 필터 버튼 생성
+    const dates = Array.from(new Set(schedule.map(e => e.date)));
+    dates.forEach(date => {
+      const btn = document.createElement('button');
+      btn.textContent = date;
+      btn.className = 'filter-button';
+      btn.onclick = () => {
+        document.querySelectorAll('.filter-button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderSchedule(date);
+      };
+      filterControls.appendChild(btn);
+    });
+    // 전체 보기 버튼
+    const allBtn = document.createElement('button');
+    allBtn.textContent = '전체 보기';
+    allBtn.className = 'filter-button active';
+    allBtn.onclick = () => {
+      document.querySelectorAll('.filter-button').forEach(b => b.classList.remove('active'));
+      allBtn.classList.add('active');
+      renderSchedule('전체 보기');
+    };
+    filterControls.appendChild(allBtn);
+
+    // 5) 초기 렌더
+    renderSchedule('전체 보기');
+  </script>
+</body>
+</html>
