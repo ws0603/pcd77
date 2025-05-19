@@ -12,7 +12,6 @@
   />
 
   <style>
-    /* ★ 필수: html, body, map 컨테이너 높이 지정 ★ */
     html, body { height: 100%; margin: 0; padding: 0; }
     body { display: flex; flex-direction: column; font-family: 'Segoe UI', sans-serif; }
 
@@ -97,7 +96,6 @@
       }
     }
 
-    /* 타일 배경만 연한 녹색 톤으로 필터 */
     .leaflet-container .leaflet-tile-pane img {
       filter: hue-rotate(90deg) saturate(0.5) !important;
     }
@@ -207,11 +205,11 @@
       { date:"5월 19일", time:"09:30", title:"중앙선거대책위원회의", coords:[37.5263,126.8968], color:"green" },
       { date:"5월 19일", time:"12:50", title:"홍천 중앙시장 상가 방문 및 연설", coords:[37.6975,127.8841], color:"green" },
       { date:"5월 19일", time:"14:40", title:"양양 전통시장 연설 및 방문", coords:[38.1156,128.6129], color:"green" },
-      { date:"5월 19일", time:"16:10", title:"주문진 수산시장 방문", coords:[37.7825,129.0340], color:"green" },
+      { date:"5월 19일", time:"16:10", title:"주문진 수산시장 방문", coords:[37.891111,128.827778], color:"green" },
       { date:"5월 19일", time:"18:20", title:"강릉 시내 유세 및 퇴근 인사", coords:[37.7561,128.8762], color:"green" }
     ];
 
-    // 지도 초기화 (OSM 공식 타일 서버)
+    // 지도 초기화
     const map = L.map('map').setView([36.5,127.5], 8);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
