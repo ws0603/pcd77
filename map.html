@@ -13,22 +13,12 @@
 
   <style>
     /* ★ 필수: html, body, map 컨테이너 높이 지정 ★ */
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      font-family: 'Segoe UI', sans-serif;
-    }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body { display: flex; flex-direction: column; font-family: 'Segoe UI', sans-serif; }
 
     #header {
-      background: #0056b3;
-      color: #fff;
-      text-align: center;
-      padding: 12px 20px;
+      background: #0056b3; color: #fff;
+      text-align: center; padding: 12px 20px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
     #header h1 { margin: 0; font-size: 1.6em; }
@@ -39,107 +29,70 @@
       #header h2 { font-size: 0.8em; margin-top: 0; }
     }
 
-    #content {
-      flex: 1;
-      display: flex;
-      position: relative;
-    }
-    #map {
-      flex: 1;
-      height: 100%;
-    }
+    #content { flex: 1; display: flex; position: relative; }
+    #map { flex: 1; height: 100%; }
     #sidebar {
-      width: 300px;
-      padding: 15px;
-      background: #fff;
-      border-left: 1px solid #ddd;
+      width: 300px; padding: 15px;
+      background: #fff; border-left: 1px solid #ddd;
       box-shadow: -2px 0 5px rgba(0,0,0,0.1);
       overflow-y: auto;
     }
     #sidebar h3 {
-      margin: 0;
-      font-size: 1.2em;
-      color: #007bff;
-      border-bottom: 2px solid #007bff;
-      padding-bottom: 5px;
+      margin: 0; font-size: 1.2em; color: #007bff;
+      border-bottom: 2px solid #007bff; padding-bottom: 5px;
     }
     #schedule-list { list-style: none; padding: 0; margin-top: 10px; }
     #schedule-list li { margin-bottom: 8px; font-size: 0.95em; }
 
     .leaflet-tooltip {
-      background: none!important;
-      box-shadow: none!important;
-      font-size: 10px!important;
-      font-weight: 600!important;
-      padding: 0!important;
-      color: #000!important;
+      background: none!important; box-shadow: none!important;
+      font-size: 10px!important; font-weight: 600!important;
+      padding: 0!important; color: #000!important;
     }
     .leaflet-popup-content-wrapper {
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
     .start-label, .finish-label {
       background: rgba(255,255,255,0.9);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: bold;
-      color: #333;
+      padding: 2px 6px; border-radius: 4px;
+      font-size: 12px; font-weight: bold; color: #333;
       pointer-events: none;
     }
 
     #legend {
-      position: absolute;
-      top: 15px; left: 15px;
+      position: absolute; top: 15px; left: 15px;
       background: rgba(255,255,255,0.95);
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 8px 12px; border-radius: 6px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      font-size: 13px;
-      color: #333;
-      z-index: 1000;
+      font-size: 13px; color: #333; z-index: 1000;
     }
     #legend strong { display: block; margin-bottom: 4px; }
 
     #total-distance {
-      position: absolute;
-      top: 15px; left: 50%;
+      position: absolute; top: 15px; left: 50%;
       transform: translateX(-50%);
       background: rgba(255,255,255,0.95);
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 8px 12px; border-radius: 6px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      font-size: 13px;
-      font-weight: 600;
-      color: #333;
-      z-index: 1000;
+      font-size: 13px; font-weight: 600; color: #333; z-index: 1000;
     }
 
     .filter-button {
-      margin: 5px 5px 5px 0;
-      padding: 6px 12px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9em;
-      transition: background 0.2s;
+      margin: 5px 5px 5px 0; padding: 6px 12px;
+      background: #007bff; color: #fff; border: none; border-radius: 4px;
+      cursor: pointer; font-size: 0.9em; transition: background 0.2s;
     }
     .filter-button:hover { background: #0056b3; }
     .filter-button.active {
-      background: #0056b3;
-      box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+      background: #0056b3; box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
     }
 
     @media (max-width:768px) {
       #content { flex-direction: column; }
       #sidebar {
-        width: 100%!important;
-        height: 40vh;
-        border-left: none;
-        border-top: 1px solid #ddd;
+        width: 100%!important; height: 40vh;
+        border-left: none; border-top: 1px solid #ddd;
         box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
       }
     }
@@ -171,7 +124,10 @@
       🟢 5월 13일<br>
       🟡 5월 14일<br>
       🟣 5월 15일<br>
-      🔴 5월 16일
+      🔴 5월 16일<br>
+      🟤 5월 17일<br>
+      🟠 5월 18일<br>
+      🟢 5월 19일
     </div>
     <div id="total-distance">총 이동 거리: 0 km</div>
   </div>
@@ -188,8 +144,9 @@
       popupAnchor: [0,-32]
     });
 
-    // 전체 일정 (5/12~5/16)
+    // 전체 일정 (5/12~5/19)
     const schedule = [
+      // 5월 12일
       { date:"5월 12일", time:"09:00", title:"중앙선거대책위원회 출정식", coords:[37.5704,126.9769], color:"blue" },
       { date:"5월 12일", time:"12:30", title:"신포시장", coords:[37.4717,126.6212], color:"blue" },
       { date:"5월 12일", time:"13:00", title:"답동성당 앞 사거리", coords:[37.4727,126.6232], color:"blue" },
@@ -199,6 +156,7 @@
       { date:"5월 12일", time:"18:00", title:"인천의 빛 유세본부 출정식", coords:[37.4898,126.7213], color:"blue" },
       { date:"5월 12일", time:"19:30", title:"부평역 인근 상가", coords:[37.4906,126.7223], color:"blue" },
 
+      // 5월 13일
       { date:"5월 13일", time:"10:00", title:"예산역전시장", coords:[36.6802,126.8471], color:"green" },
       { date:"5월 13일", time:"11:20", title:"내포시 상가방문", coords:[36.6588,126.6723], color:"green" },
       { date:"5월 13일", time:"14:00", title:"논산화지시장", coords:[36.1918,127.0887], color:"green" },
@@ -207,24 +165,46 @@
       { date:"5월 13일", time:"16:30", title:"계룡시장", coords:[36.2764,127.2428], color:"green" },
       { date:"5월 13일", time:"17:30", title:"금암사거리", coords:[36.2798,127.2382], color:"green" },
 
+      // 5월 14일
       { date:"5월 14일", time:"13:10", title:"제천 내토시장", coords:[37.1365,128.2121], color:"orange" },
       { date:"5월 14일", time:"14:50", title:"충주 자유시장", coords:[36.9910,127.9268], color:"orange" },
       { date:"5월 14일", time:"16:10", title:"괴산 전통시장", coords:[36.8104,127.7987], color:"orange" },
       { date:"5월 14일", time:"17:50", title:"청주 가경터미널시장", coords:[36.6376,127.4316], color:"orange" },
 
+      // 5월 15일
       { date:"5월 15일", time:"10:00", title:"세종 간담회", coords:[36.5042,127.2590], color:"purple" },
       { date:"5월 15일", time:"11:00", title:"조치원 전통시장", coords:[36.6010,127.2891], color:"purple" },
       { date:"5월 15일", time:"12:10", title:"정부세종청사 앞", coords:[36.5043,127.2658], color:"purple" },
       { date:"5월 15일", time:"13:30", title:"국립대전현충원", coords:[36.3384,127.3085], color:"purple" },
       { date:"5월 15일", time:"14:10", title:"충남대 앞", coords:[36.3649,127.3446], color:"purple" },
       { date:"5월 15일", time:"15:00", title:"카이스트 유세", coords:[36.3724,127.3628], color:"purple" },
+      { date:"5월 15일", time:"17:00", title:"이글스파크 유세", coords:[36.3195,127.4193], color:"purple" },
 
+      // 5월 16일
       { date:"5월 16일", time:"12:00", title:"여의도 우체국 집중유세", coords:[37.5250,126.9240], color:"red" },
       { date:"5월 16일", time:"12:30", title:"여의도 도보유세", coords:[37.5240,126.9245], color:"red" },
       { date:"5월 16일", time:"15:20", title:"목동 도보유세", coords:[37.5335,126.8760], color:"red" },
       { date:"5월 16일", time:"16:00", title:"목동 현대백화점 집중유세", coords:[37.5320,126.8780], color:"red" },
       { date:"5월 16일", time:"18:10", title:"경의선숲길 도보유세", coords:[37.5550,126.9360], color:"red" },
-      { date:"5월 16일", time:"19:00", title:"공덕역 집중유세", coords:[37.5390,126.9510], color:"red" }
+      { date:"5월 16일", time:"19:00", title:"공덕역 집중유세", coords:[37.5390,126.9510], color:"red" },
+
+      // 5월 17일
+      { date:"5월 17일", time:"09:30", title:"제56회 전국 편집기자 배구대회 및 가족운동회", coords:[37.5000,127.0090], color:"brown" },
+      { date:"5월 17일", time:"10:20", title:"<서울 골목골목 유세> 중구 약수역 4번 출구", coords:[37.5485,127.0174], color:"brown" },
+      { date:"5월 17일", time:"11:30", title:"중구 거점 유세 / 명동호프 앞", coords:[37.5605,126.9870], color:"brown" },
+      { date:"5월 17일", time:"13:30", title:"<서울 골목골목 유세> 용산구 한전용산창고", coords:[37.5321,126.9770], color:"brown" },
+      { date:"5월 17일", time:"14:30", title:"용산구 거점 유세 / 용산역 앞", coords:[37.5319,126.9651], color:"brown" },
+      { date:"5월 17일", time:"14:50", title:"<서울 골목골목 유세> 용산역 내부", coords:[37.5319,126.9651], color:"brown" },
+      { date:"5월 17일", time:"17:30", title:"<서울 골목골목 유세> 광진구 건대스타시티점 앞", coords:[37.5402,127.0700], color:"brown" },
+
+      // 5월 18일
+      { date:"5월 18일", time:"10:00", title:"제45주년 5·18민주화운동 기념식", coords:[35.1914,126.8177], color:"orange" },
+      { date:"5월 18일", time:"14:00", title:"영산강 문화공원 유세 / 담양 죽녹원", coords:[35.3210,126.9890], color:"orange" },
+      { date:"5월 18일", time:"15:30", title:"곡성 기차마을 장미축제 경청투어", coords:[35.2276,127.3126], color:"orange" },
+      { date:"5월 18일", time:"16:40", title:"곡성 기차당 뚝방마켓 유세", coords:[35.2052,127.2869], color:"orange" },
+
+      // 5월 19일
+      { date:"5월 19일", time:"09:30", title:"중앙선거대책위원회의", coords:[37.5263,126.8968], color:"green" }
     ];
 
     // 지도 초기화 (OSM 공식 타일 서버)
@@ -238,6 +218,7 @@
     const scheduleList   = document.getElementById('schedule-list');
     const totalDistance  = document.getElementById('total-distance');
 
+    // 날짜별 그룹핑
     const groupedByDate = {};
     schedule.forEach(e => {
       if (!groupedByDate[e.date]) groupedByDate[e.date] = [];
@@ -255,41 +236,40 @@
       scheduleList.innerHTML = '';
       let total = 0;
       const list = date === '전체 보기' ? schedule : (groupedByDate[date] || []);
+
       list.forEach((ev, i) => {
+        // 마커
         const m = L.marker(ev.coords, { icon: customIcon, title: ev.title }).addTo(map);
         layers.push(m);
         m.bindTooltip(ev.title, { className:'leaflet-tooltip', direction:'top', offset:[0,-10], sticky:true })
          .bindPopup(`<strong>${ev.time}</strong><br>${ev.title}<br>${ev.date}`);
 
+        // START/FINISH
         if (i === 0) {
           L.tooltip({ permanent:true, className:'start-label', direction:'top', offset:[0,-40] })
-            .setLatLng(ev.coords)
-            .setContent('START')
-            .addTo(map);
+            .setLatLng(ev.coords).setContent('START').addTo(map);
         }
         if (i === list.length - 1) {
           L.tooltip({ permanent:true, className:'finish-label', direction:'top', offset:[0,-40] })
-            .setLatLng(ev.coords)
-            .setContent('FINISH')
-            .addTo(map);
+            .setLatLng(ev.coords).setContent('FINISH').addTo(map);
         }
 
+        // 선, 거리
         if (i > 0) {
           const from = turf.point([list[i-1].coords[1], list[i-1].coords[0]]);
           const to   = turf.point([ev.coords[1], ev.coords[0]]);
           const d    = turf.distance(from, to, { units:'kilometers' });
           total += d;
-          const line = L.polyline([list[i-1].coords, ev.coords], { color: ev.color, weight:1.5 }).addTo(map);
+          const line = L.polyline([list[i-1].coords, ev.coords], { color: ev.color, weight: 1.5 }).addTo(map);
           layers.push(line);
           const midLat = (ev.coords[0] + list[i-1].coords[0]) / 2;
           const midLng = (ev.coords[1] + list[i-1].coords[1]) / 2;
           const lbl = L.tooltip({ permanent:true, className:'leaflet-tooltip', direction:'center' })
-            .setLatLng([midLat, midLng])
-            .setContent(`${d.toFixed(2)} km`)
-            .addTo(map);
+            .setLatLng([midLat, midLng]).setContent(`${d.toFixed(2)} km`).addTo(map);
           layers.push(lbl);
         }
 
+        // 사이드바
         const li = document.createElement('li');
         li.textContent = `🕒 ${ev.date} ${ev.time} - ${ev.title}`;
         scheduleList.appendChild(li);
@@ -310,6 +290,8 @@
       };
       filterControls.appendChild(btn);
     });
+
+    // 전체 보기 버튼
     const allBtn = document.createElement('button');
     allBtn.className = 'filter-button active';
     allBtn.textContent = '전체 보기';
