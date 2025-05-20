@@ -43,24 +43,12 @@
       clip-path: polygon(100% 0, 0 100%, 100% 100%);
       pointer-events: none;
     }
-
-    .action-buttons {
-      position: absolute; top: 12px; right: 20px;
-    }
-    .action-buttons button {
-      margin-left: 6px; padding: 6px 10px;
-      border: none; border-radius: 4px;
-      background: #fff; color: #0056b3;
-      font-size: 0.85em; cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .action-buttons button:hover { background: #e6e6e6; }
+    /* 헤더에는 버튼이 없습니다 */
 
     @media (max-width: 768px) {
       #header { padding: 6px 10px; }
       #header h1 { font-size: 1em; }
       #header h2 { font-size: 0.8em; margin-top: 0; }
-      .action-buttons { top: 6px; right: 10px; }
     }
 
     #content { flex: 1; display: flex; position: relative; }
@@ -72,10 +60,29 @@
       overflow-y: auto;
     }
     #sidebar h3 {
-      margin: 0; font-size: 1.2em; color: #007bff;
-      border-bottom: 2px solid #007bff; padding-bottom: 5px;
+      margin: 0 0 8px;
+      font-size: 1.2em; color: #007bff;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 5px;
+      display: block;
     }
-    #schedule-list { list-style: none; padding: 0; margin-top: 10px; }
+    /* 유세 일정 바로 아래 버튼 */
+    #sidebar .action-buttons {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    #sidebar .action-buttons button {
+      padding: 6px 10px;
+      border: none; border-radius: 4px;
+      background: #fff; color: #0056b3;
+      font-size: 0.85em; cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    #sidebar .action-buttons button:hover { background: #e6e6e6; }
+
+    #filter-controls { margin-bottom: 10px; }
+    #schedule-list { list-style: none; padding: 0; margin: 0; }
     #schedule-list li { margin-bottom: 8px; font-size: 0.95em; }
 
     .leaflet-tooltip {
@@ -112,7 +119,7 @@
     }
 
     .filter-button {
-      margin: 5px 5px 5px 0; padding: 6px 12px;
+      margin: 0 5px 5px 0; padding: 6px 12px;
       background: #007bff; color: #fff; border: none; border-radius: 4px;
       cursor: pointer; font-size: 0.9em; transition: background 0.2s;
     }
@@ -140,17 +147,17 @@
   <div id="header">
     <h1>이제부터 진짜 대한민국, 지금은 이재명</h1>
     <h2>박찬대 상임총괄선대위원장 유세지도</h2>
-    <div class="action-buttons">
-      <button onclick="shareLink()">공유</button>
-      <button onclick="exportMap('pdf')">PDF로 저장</button>
-      <button onclick="exportMap('png')">이미지로 저장</button>
-    </div>
   </div>
 
   <div id="content">
     <div id="map"></div>
     <div id="sidebar">
       <h3>📅 유세 일정</h3>
+      <div class="action-buttons">
+        <button onclick="shareLink()">공유</button>
+        <button onclick="exportMap('pdf')">PDF로 저장</button>
+        <button onclick="exportMap('png')">이미지로 저장</button>
+      </div>
       <div id="filter-controls"></div>
       <ul id="schedule-list"></ul>
     </div>
@@ -284,7 +291,7 @@
       { date:"5월 19일", time:"09:30", title:"중앙선거대책위원회의", coords:[37.5263,126.8968], color:"green" },
       { date:"5월 19일", time:"12:50", title:"홍천 중앙시장 상가 방문 및 연설", coords:[37.6975,127.8841], color:"green" },
       { date:"5월 19일", time:"14:40", title:"양양 전통시장 연설 및 방문", coords:[38.1156,128.6129], color:"green" },
-      { date:"5월 19일", time:"16:10", title:"주문진 수산시장 방문", coords:[37.891111,128.827778], color:"green" },
+      { date:"5월 19일", time:"16:10", title:"주문진 수산시장 방문", coords:[37.8911,128.8278], color:"green" },
       { date:"5월 19일", time:"18:20", title:"강릉 시내 유세 및 퇴근 인사", coords:[37.7561,128.8762], color:"green" },
 
       // 5월 20일
