@@ -33,7 +33,7 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
     #header h1 { margin: 0; font-size: 1.6em; }
-    #header h2 { margin: 4px 0 0; font-size: 1.1em; font-weight:300; opacity:0.9; }
+    #header h2 { margin: 4px 0 0; font-size: 1.1em; font-weight: 300; opacity: 0.9; }
     #header::after {
       content: '';
       position: absolute;
@@ -43,12 +43,18 @@
       clip-path: polygon(100% 0, 0 100%, 100% 100%);
       pointer-events: none;
     }
-    /* 헤더에는 버튼이 없습니다 */
+    #toggle-schedule {
+      position: absolute; top: 50%; right: 20px;
+      transform: translateY(-50%);
+      background: #fff; color: #0056b3;
+      border: none; padding: 6px 12px; border-radius: 4px;
+      font-size: 0.9em; cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    #toggle-schedule:hover { background: #e6e6e6; }
 
     @media (max-width: 768px) {
-      #header { padding: 6px 10px; }
-      #header h1 { font-size: 1em; }
-      #header h2 { font-size: 0.8em; margin-top: 0; }
+      #toggle-schedule { position: static; transform: none; margin-top: 8px; }
     }
 
     #content { flex: 1; display: flex; position: relative; }
@@ -59,25 +65,20 @@
       box-shadow: -2px 0 5px rgba(0,0,0,0.1);
       overflow-y: auto;
     }
+    #sidebar.hidden { display: none; }
+
     #sidebar h3 {
       margin: 0 0 8px;
       font-size: 1.2em; color: #007bff;
-      border-bottom: 2px solid #007bff;
-      padding-bottom: 5px;
-      display: block;
+      border-bottom: 2px solid #007bff; padding-bottom: 5px;
     }
-    /* 유세 일정 바로 아래 버튼 */
     #sidebar .action-buttons {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 12px;
+      display: flex; gap: 6px; margin-bottom: 12px;
     }
     #sidebar .action-buttons button {
-      padding: 6px 10px;
-      border: none; border-radius: 4px;
-      background: #fff; color: #0056b3;
-      font-size: 0.85em; cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      padding: 6px 10px; border: none; border-radius: 4px;
+      background: #fff; color: #0056b3; font-size: 0.85em;
+      cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
     #sidebar .action-buttons button:hover { background: #e6e6e6; }
 
@@ -136,10 +137,6 @@
         box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
       }
     }
-
-    .leaflet-container .leaflet-tile-pane img {
-      filter: hue-rotate(90deg) saturate(0.5) !important;
-    }
   </style>
 </head>
 <body>
@@ -147,6 +144,7 @@
   <div id="header">
     <h1>이제부터 진짜 대한민국, 지금은 이재명</h1>
     <h2>박찬대 상임총괄선대위원장 유세지도</h2>
+    <button id="toggle-schedule">상세 일정 닫기</button>
   </div>
 
   <div id="content">
@@ -164,14 +162,9 @@
 
     <div id="legend">
       <strong>일자별</strong><br>
-      🔵 5월 12일<br>
-      🟢 5월 13일<br>
-      🟡 5월 14일<br>
-      🟣 5월 15일<br>
-      🔴 5월 16일<br>
-      🟤 5월 17일<br>
-      🟠 5월 18일<br>
-      🟢 5월 19일
+      🔵 5월 12일<br>🟢 5월 13일<br>🟡 5월 14일<br>
+      🟣 5월 15일<br>🔴 5월 16일<br>🟤 5월 17일<br>
+      🟠 5월 18일<br>🟢 5월 19일<br>🔵 5월 20일<br>🟢 5월 21일
     </div>
     <div id="total-distance">총 이동 거리: 0 km</div>
   </div>
@@ -185,36 +178,40 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
+    // toggle sidebar
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('toggle-schedule').onclick = () => {
+      const hidden = sidebar.classList.toggle('hidden');
+      document.getElementById('toggle-schedule').textContent =
+        hidden ? '상세 일정 보기' : '상세 일정 닫기';
+    };
+
+    // share & export
     function shareLink() {
       const url = location.href;
-      if (navigator.share) {
-        navigator.share({ title: document.title, url });
-      } else {
-        prompt('이 링크를 복사해서 공유하세요', url);
-      }
+      if (navigator.share) navigator.share({ title: document.title, url });
+      else prompt('이 링크를 복사하세요', url);
     }
-
     async function exportMap(format) {
       const { jsPDF } = window.jspdf;
-      const content = document.getElementById('content');
-      const canvas = await html2canvas(content, { useCORS: true });
+      const canvas = await html2canvas(document.getElementById('content'), { useCORS: true });
       if (format === 'png') {
-        const imgURL = canvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.href = imgURL;
+        link.href = canvas.toDataURL('image/png');
         link.download = 'map.png';
         link.click();
       } else {
         const pdf = new jsPDF({ orientation: 'landscape' });
         const imgData = canvas.toDataURL('image/jpeg', 0.9);
         const ratio = canvas.width / canvas.height;
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdfWidth / ratio;
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        const w = pdf.internal.pageSize.getWidth();
+        const h = w / ratio;
+        pdf.addImage(imgData, 'JPEG', 0, 0, w, h);
         pdf.save('map.pdf');
       }
     }
 
+    // initialize map
     const map = L.map('map').setView([36.5,127.5], 8);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
@@ -229,8 +226,8 @@
       popupAnchor: [0,-32]
     });
 
+    // full schedule 5/12–5/21
     const schedule = [
-      // 5월 12일
       { date:"5월 12일", time:"09:00", title:"중앙선거대책위원회 출정식", coords:[37.5704,126.9769], color:"blue" },
       { date:"5월 12일", time:"12:30", title:"신포시장", coords:[37.4717,126.6212], color:"blue" },
       { date:"5월 12일", time:"13:00", title:"답동성당 앞 사거리", coords:[37.4727,126.6232], color:"blue" },
@@ -240,7 +237,6 @@
       { date:"5월 12일", time:"18:00", title:"인천의 빛 유세본부 출정식", coords:[37.4898,126.7213], color:"blue" },
       { date:"5월 12일", time:"19:30", title:"부평역 인근 상가", coords:[37.4906,126.7223], color:"blue" },
 
-      // 5월 13일
       { date:"5월 13일", time:"10:00", title:"예산역전시장", coords:[36.6802,126.8471], color:"green" },
       { date:"5월 13일", time:"11:20", title:"내포시 상가방문", coords:[36.6588,126.6723], color:"green" },
       { date:"5월 13일", time:"14:00", title:"논산화지시장", coords:[36.1918,127.0887], color:"green" },
@@ -249,13 +245,11 @@
       { date:"5월 13일", time:"16:30", title:"계룡시장", coords:[36.2764,127.2428], color:"green" },
       { date:"5월 13일", time:"17:30", title:"금암사거리", coords:[36.2798,127.2382], color:"green" },
 
-      // 5월 14일
       { date:"5월 14일", time:"13:10", title:"제천 내토시장", coords:[37.1365,128.2121], color:"orange" },
       { date:"5월 14일", time:"14:50", title:"충주 자유시장", coords:[36.9910,127.9268], color:"orange" },
       { date:"5월 14일", time:"16:10", title:"괴산 전통시장", coords:[36.8104,127.7987], color:"orange" },
       { date:"5월 14일", time:"17:50", title:"청주 가경터미널시장", coords:[36.6376,127.4316], color:"orange" },
 
-      // 5월 15일
       { date:"5월 15일", time:"10:00", title:"세종 간담회", coords:[36.5042,127.2590], color:"purple" },
       { date:"5월 15일", time:"11:00", title:"조치원 전통시장", coords:[36.6010,127.2891], color:"purple" },
       { date:"5월 15일", time:"12:10", title:"정부세종청사 앞", coords:[36.5043,127.2658], color:"purple" },
@@ -264,7 +258,6 @@
       { date:"5월 15일", time:"15:00", title:"카이스트 유세", coords:[36.3724,127.3628], color:"purple" },
       { date:"5월 15일", time:"17:00", title:"이글스파크 유세", coords:[36.3195,127.4193], color:"purple" },
 
-      // 5월 16일
       { date:"5월 16일", time:"12:00", title:"여의도 우체국 집중유세", coords:[37.5250,126.9240], color:"red" },
       { date:"5월 16일", time:"12:30", title:"여의도 도보유세", coords:[37.5240,126.9245], color:"red" },
       { date:"5월 16일", time:"15:20", title:"목동 도보유세", coords:[37.5335,126.8760], color:"red" },
@@ -272,7 +265,6 @@
       { date:"5월 16일", time:"18:10", title:"경의선숲길 도보유세", coords:[37.5550,126.9360], color:"red" },
       { date:"5월 16일", time:"19:00", title:"공덕역 집중유세", coords:[37.5390,126.9510], color:"red" },
 
-      // 5월 17일
       { date:"5월 17일", time:"09:30", title:"제56회 전국 편집기자 배구대회 및 가족운동회", coords:[37.5000,127.0090], color:"brown" },
       { date:"5월 17일", time:"10:20", title:"<서울 골목골목 유세> 중구 약수역 4번 출구", coords:[37.5485,127.0174], color:"brown" },
       { date:"5월 17일", time:"11:30", title:"중구 거점 유세 / 명동호프 앞", coords:[37.5605,126.9870], color:"brown" },
@@ -281,35 +273,59 @@
       { date:"5월 17일", time:"14:50", title:"<서울 골목골목 유세> 용산역 내부", coords:[37.5319,126.9651], color:"brown" },
       { date:"5월 17일", time:"17:30", title:"<서울 골목골목 유세> 광진구 건대스타시티점 앞", coords:[37.5402,127.0700], color:"brown" },
 
-      // 5월 18일
       { date:"5월 18일", time:"10:00", title:"제45주년 5·18민주화운동 기념식", coords:[35.1914,126.8177], color:"orange" },
       { date:"5월 18일", time:"14:00", title:"영산강 문화공원 유세 / 담양 죽녹원", coords:[35.3210,126.9890], color:"orange" },
       { date:"5월 18일", time:"15:30", title:"곡성 기차마을 장미축제 경청투어", coords:[35.2276,127.3126], color:"orange" },
       { date:"5월 18일", time:"16:40", title:"곡성 기차당 뚝방마켓 유세", coords:[35.2052,127.2869], color:"orange" },
 
-      // 5월 19일
       { date:"5월 19일", time:"09:30", title:"중앙선거대책위원회의", coords:[37.5263,126.8968], color:"green" },
       { date:"5월 19일", time:"12:50", title:"홍천 중앙시장 상가 방문 및 연설", coords:[37.6975,127.8841], color:"green" },
       { date:"5월 19일", time:"14:40", title:"양양 전통시장 연설 및 방문", coords:[38.1156,128.6129], color:"green" },
-      { date:"5월 19일", time:"16:10", title:"주문진 수산시장 방문", coords:[37.8911,128.8278], color:"green" },
+      { date:"5월 19일", time:"16:10", title:"주문진 수산시장 방문", coords:[37.891111,128.827778], color:"green" },
       { date:"5월 19일", time:"18:20", title:"강릉 시내 유세 및 퇴근 인사", coords:[37.7561,128.8762], color:"green" },
 
-      // 5월 20일
       { date:"5월 20일", time:"06:30", title:"[동해] 묵호항 활어 경매시장 방문", coords:[37.5239,129.1151], color:"green" },
       { date:"5월 20일", time:"08:00", title:"[동해] 어민대표단·수협관계자 경청 간담회", coords:[37.5255,129.1175], color:"green" },
       { date:"5월 20일", time:"10:30", title:"[정선] 사북 상가 방문", coords:[37.1492,128.7205], color:"green" },
       { date:"5월 20일", time:"11:40", title:"[정선] 읍내 연설 및 상가 방문", coords:[37.1703,128.7675], color:"green" },
       { date:"5월 20일", time:"13:30", title:"[평창] 전통시장 연설 및 시장 방문", coords:[37.3704,128.3919], color:"green" },
       { date:"5월 20일", time:"16:30", title:"[횡성] 연설 및 상가 방문", coords:[37.4891,127.9786], color:"green" },
-      { date:"5월 20일", time:"18:00", title:"[원주] 시청사거리 연설 및 퇴근인사", coords:[37.3439,127.9206], color:"green" }
+      { date:"5월 20일", time:"18:00", title:"[원주] 시청사거리 연설 및 퇴근인사", coords:[37.3439,127.9206], color:"green" },
+
+      { date:"5월 21일", time:"08:00", title:"서울 영등포구 의사당대로 1", coords:[37.5265,126.8961], color:"green" },
+      { date:"5월 21일", time:"14:00", title:"[경북 문경] 점촌터미널 유세 및 상가경청투어", coords:[36.586632,128.184297], color:"green" },
+      { date:"5월 21일", time:"16:05", title:"[경북 상주] 상주풍물시장 유세", coords:[36.414444,128.159444], color:"green" },
+      { date:"5월 21일", time:"17:30", title:"[경북 안동] 송현오거리 유세 및 퇴근인사", coords:[36.5675,128.712778], color:"green" },
+      { date:"5월 21일", time:"17:55", title:"[경북 안동] 옥동사거리 골목경청투어", coords:[36.570833,128.631944], color:"green" }
     ];
 
+    // grouping & filters
     const groupedByDate = {};
     schedule.forEach(ev => {
-      if (!groupedByDate[ev.date]) groupedByDate[ev.date] = [];
-      groupedByDate[ev.date].push(ev);
+      (groupedByDate[ev.date] ||= []).push(ev);
     });
+    const filterControls = document.getElementById('filter-controls');
+    Object.keys(groupedByDate).sort().forEach(date => {
+      const b = document.createElement('button');
+      b.className = 'filter-button';
+      b.textContent = date;
+      b.onclick = () => { setActive(date); render(date); };
+      filterControls.appendChild(b);
+    });
+    const allBtn = document.createElement('button');
+    allBtn.className = 'filter-button active';
+    allBtn.textContent = '전체 보기';
+    allBtn.onclick = () => { setActive('전체 보기'); render('전체 보기'); };
+    filterControls.appendChild(allBtn);
 
+    function setActive(date) {
+      document.querySelectorAll('.filter-button').forEach(x => x.classList.remove('active'));
+      (date === '전체 보기' ? allBtn :
+        [...filterControls.children].find(x => x.textContent === date))
+        .classList.add('active');
+    }
+
+    // render logic
     let layers = [];
     function clearMap() {
       markerCluster.clearLayers();
@@ -321,66 +337,45 @@
       clearMap();
       document.getElementById('schedule-list').innerHTML = '';
       let total = 0;
-      const list = date === '전체 보기' ? schedule : (groupedByDate[date] || []);
-
+      const list = date === '전체 보기' ? schedule : groupedByDate[date];
       list.forEach((ev, i) => {
         const m = L.marker(ev.coords, { icon: customIcon, title: ev.title });
         markerCluster.addLayer(m);
+        m.bindTooltip(ev.title, {
+          className: 'leaflet-tooltip', direction: 'top', offset: [0, -10], sticky: true
+        }).bindPopup(`<strong>${ev.time}</strong><br>${ev.title}<br>${ev.date}`);
 
-        m.bindTooltip(ev.title, { className:'leaflet-tooltip', direction:'top', offset:[0,-10], sticky:true })
-         .bindPopup(`<strong>${ev.time}</strong><br>${ev.title}<br>${ev.date}`);
-
-        if (i === 0) L.tooltip({ permanent:true, className:'start-label', direction:'top', offset:[0,-40] })
-                      .setLatLng(ev.coords).setContent('START').addTo(map);
-        if (i === list.length - 1) L.tooltip({ permanent:true, className:'finish-label', direction:'top', offset:[0,-40] })
-                                     .setLatLng(ev.coords).setContent('FINISH').addTo(map);
-
+        if (i === 0) {
+          L.tooltip({ permanent: true, className: 'start-label', direction: 'top', offset: [0, -40] })
+           .setLatLng(ev.coords).setContent('START').addTo(map);
+        }
+        if (i === list.length - 1) {
+          L.tooltip({ permanent: true, className: 'finish-label', direction: 'top', offset: [0, -40] })
+           .setLatLng(ev.coords).setContent('FINISH').addTo(map);
+        }
         if (i > 0) {
-          const prev = list[i-1];
+          const prev = list[i - 1];
           const d = turf.distance(
             turf.point([prev.coords[1], prev.coords[0]]),
             turf.point([ev.coords[1], ev.coords[0]]),
-            { units:'kilometers' }
+            { units: 'kilometers' }
           );
           total += d;
-          const line = L.polyline([prev.coords, ev.coords], { color: ev.color, weight:1.5 }).addTo(map);
+          const line = L.polyline([prev.coords, ev.coords], { color: ev.color, weight: 1.5 }).addTo(map);
+          line.on('click', () => {
+            line.bindTooltip(`${d.toFixed(2)} km`, {
+              permanent: false, className: 'leaflet-tooltip', direction: 'center'
+            }).openTooltip();
+          });
           layers.push(line);
-          const mid = [(prev.coords[0]+ev.coords[0])/2, (prev.coords[1]+ev.coords[1])/2];
-          layers.push(L.tooltip({ permanent:true, className:'leaflet-tooltip', direction:'center' })
-                        .setLatLng(mid).setContent(`${d.toFixed(2)} km`).addTo(map));
         }
-
         const li = document.createElement('li');
         li.textContent = `🕒 ${ev.date} ${ev.time} - ${ev.title}`;
         document.getElementById('schedule-list').appendChild(li);
       });
-
       map.addLayer(markerCluster);
       document.getElementById('total-distance').textContent = `총 이동 거리: ${total.toFixed(2)} km`;
     }
-
-    const filterControls = document.getElementById('filter-controls');
-    Object.keys(groupedByDate).sort().forEach(date => {
-      const btn = document.createElement('button');
-      btn.className = 'filter-button';
-      btn.textContent = date;
-      btn.onclick = () => {
-        document.querySelectorAll('.filter-button').forEach(x => x.classList.remove('active'));
-        btn.classList.add('active');
-        render(date);
-      };
-      filterControls.appendChild(btn);
-    });
-
-    const allBtn = document.createElement('button');
-    allBtn.className = 'filter-button active';
-    allBtn.textContent = '전체 보기';
-    allBtn.onclick = () => {
-      document.querySelectorAll('.filter-button').forEach(x => x.classList.remove('active'));
-      allBtn.classList.add('active');
-      render('전체 보기');
-    };
-    filterControls.appendChild(allBtn);
 
     render('전체 보기');
   </script>
